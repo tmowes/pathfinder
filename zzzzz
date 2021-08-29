@@ -1,0 +1,5 @@
+npx create-nextron-app pathfinder --example with-typescript
+
+npx install-peerdeps --dev @lukemorales/eslint-config -Y
+
+yarn add @chakra-ui/react @emotion/react @emotion/styled axios date-fns framer-motion json-server react-icons react-select @types/react-select @babel/core -D
