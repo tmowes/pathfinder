@@ -34,7 +34,7 @@ export const WindowContainer = (props: WindowContainerProps) => {
           h="100%"
           align="center"
           justify="center"
-          p="4"
+          p="2"
           bg="gray.800"
           __css={{
             WebkitAppRegion: 'no-drag',

@@ -6,7 +6,7 @@ import * as C from '../components'
 import { Node } from '../utils/algorithms/dijkstra/types'
 import { dijkstra, getNodesInShortestPathOrder } from '../utils/algorithms/dijkstra'
 
-const NUM_COLS = Math.floor(48 * 2.5 * 1.5)
+const NUM_COLS = Math.floor(48 * 2.85 * 1.5)
 const NUM_ROWS = Math.floor(27 * 2.05 * 1.5)
 
 const START_NODE_ROW = 3
@@ -45,7 +45,7 @@ export default function Home() {
     setGrid(newGrid)
   }
 
-  function visualizeDijkstra() {
+  const visualizeDijkstra = () => {
     console.time('visualization')
     const startNode = grid[START_NODE_ROW][START_NODE_COL]
     const finishNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL]
@@ -59,8 +59,8 @@ export default function Home() {
   const reload = useCallback(() => {
     setIsFinished(false)
     setGrid(
-      new Array(NUM_ROWS).fill({}).map((_r, rowIdx) =>
-        new Array(NUM_COLS).fill({}).map((_c, colIdx) => ({
+      Array.from({ length: NUM_ROWS }, (_r, rowIdx) =>
+        Array.from({ length: NUM_COLS }, (_c, colIdx) => ({
           col: colIdx,
           row: rowIdx,
           isStart: rowIdx === START_NODE_ROW && colIdx === START_NODE_COL,
