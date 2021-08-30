@@ -34,11 +34,11 @@ export const NodeItem = (props: NodeItemProps) => {
 
   return (
     <Box
-      w="10px"
-      h="10px"
+      w="6px"
+      h="6px"
       bg={bgColor}
-      mx="0.5px"
-      rounded="3"
+      mx="0.25px"
+      rounded="2"
       onMouseDown={() => onMouseDown(row, col)}
       onMouseEnter={() => onMouseEnter(row, col)}
       onMouseUp={() => onMouseUp()}

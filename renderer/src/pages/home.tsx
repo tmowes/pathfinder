@@ -6,8 +6,8 @@ import * as C from '../components'
 import { Node } from '../utils/algorithms/dijkstra/types'
 import { dijkstra, getNodesInShortestPathOrder } from '../utils/algorithms/dijkstra'
 
-const NUM_COLS = Math.floor(48 * 2.5)
-const NUM_ROWS = Math.floor(27 * 2.05)
+const NUM_COLS = Math.floor(48 * 2.5 * 1.5)
+const NUM_ROWS = Math.floor(27 * 2.05 * 1.5)
 
 const START_NODE_ROW = 3
 const START_NODE_COL = 3
@@ -46,12 +46,14 @@ export default function Home() {
   }
 
   function visualizeDijkstra() {
+    console.time('visualization')
     const startNode = grid[START_NODE_ROW][START_NODE_COL]
     const finishNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL]
     dijkstra(grid, startNode, finishNode)
     getNodesInShortestPathOrder(finishNode)
     setShouldUpdate(true)
     setIsFinished(true)
+    console.timeEnd('visualization')
   }
 
   const reload = useCallback(() => {
