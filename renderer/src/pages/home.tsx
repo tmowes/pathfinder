@@ -1,133 +1,80 @@
 import { useCallback, useEffect, useState } from 'react'
 
-import { Button, Flex, VStack } from '@chakra-ui/react'
+import { Flex } from '@chakra-ui/react'
 
 import * as C from '../components'
-import { Node } from '../utils/algorithms/dijkstra/types'
-import { dijkstra, getNodesInShortestPathOrder } from '../utils/algorithms/dijkstra'
+import { create2DMatrix } from '../utils/create2DMatrix'
+import { mainAStar } from '../utils/algorithms/aStar'
+import { Node } from '../utils/algorithms/aStar/types'
 
-const NUM_COLS = Math.floor(48 * 2.85 * 1.5)
-const NUM_ROWS = Math.floor(27 * 2.05 * 1.5)
+const FPS = 60
 
-const START_NODE_ROW = 3
-const START_NODE_COL = 3
-const FINISH_NODE_ROW = Math.floor(Math.random() * NUM_ROWS) ?? 25
-const FINISH_NODE_COL = Math.floor(Math.random() * NUM_COLS) ?? 45
+const cols = Math.floor(140 * 2)
+const rows = Math.floor(70 * 2)
+// 002450 / 2 avg 0.004seconds
+// 009800 * 1 avg 0.026seconds
+// 039200 * 2 avg 0.26seconds
+// 088200 * 3 avg 0.9seconds
+// 156800 * 4 avg 3.2seconds
+// 245000 * 5 avg 7.0seconds
+
+const CANVAS_WIDTH = 1400
+const CANVAS_HEIGHT = 700
+
+const TILE_WIDTH = Math.floor(CANVAS_WIDTH / cols)
+const TILE_HEIGHT = Math.floor(CANVAS_HEIGHT / rows)
+
+const gridColors = {
+  isWall: '#1c1c1c',
+  isEmpty: '#99999',
+}
 
 export default function Home() {
-  const [mouseIsPressed, setMouseIsPressed] = useState(false)
   const [grid, setGrid] = useState<Node[][]>([])
-  const [shouldUpdate, setShouldUpdate] = useState(false)
-  const [isFinished, setIsFinished] = useState(false)
 
-  const getNewGridWithWallToggled = (row: number, col: number) =>
-    grid.map(item =>
-      item.map(node => {
-        if (node.col === col && node.row === row) {
-          return {
-            ...node,
-            isWall: !node.isWall,
-          }
-        }
-        return node
+  const draw = useCallback(
+    (ctx: CanvasRenderingContext2D) => {
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
+      grid.flat().forEach(cell => {
+        const color =
+          (cell.isShortest && 'orangered') ||
+          (cell.isWall && 'black') ||
+          (cell.isStart && 'red') ||
+          (cell.isFinish && 'green') ||
+          (cell.isVisited && 'dodgerblue') ||
+          'gray'
+        ctx.fillStyle = color
+        ctx.fillRect(
+          cell.col * TILE_WIDTH,
+          cell.row * TILE_HEIGHT,
+          TILE_WIDTH,
+          TILE_HEIGHT
+        )
       })
-    )
+      ctx.fill()
+    },
+    [grid]
+  )
 
-  function handleMouseDown(row: number, col: number) {
-    const newGrid = getNewGridWithWallToggled(row, col)
-    setMouseIsPressed(true)
-    setGrid(newGrid)
-  }
-
-  function handleMouseEnter(row: number, col: number) {
-    if (!mouseIsPressed) return
-    const newGrid = getNewGridWithWallToggled(row, col)
-    setGrid(newGrid)
-  }
-
-  const visualizeDijkstra = () => {
-    console.time('visualization')
-    const startNode = grid[START_NODE_ROW][START_NODE_COL]
-    const finishNode = grid[FINISH_NODE_ROW][FINISH_NODE_COL]
-    dijkstra(grid, startNode, finishNode)
-    getNodesInShortestPathOrder(finishNode)
-    setShouldUpdate(true)
-    setIsFinished(true)
-    console.timeEnd('visualization')
-  }
-
-  const reload = useCallback(() => {
-    setIsFinished(false)
-    setGrid(
-      Array.from({ length: NUM_ROWS }, (_r, rowIdx) =>
-        Array.from({ length: NUM_COLS }, (_c, colIdx) => ({
-          col: colIdx,
-          row: rowIdx,
-          isStart: rowIdx === START_NODE_ROW && colIdx === START_NODE_COL,
-          isFinish: rowIdx === FINISH_NODE_ROW && colIdx === FINISH_NODE_COL,
-          distance: Infinity,
-          isVisited: false,
-          isShortest: false,
-          isWall:
-            !(rowIdx === START_NODE_ROW && colIdx === START_NODE_COL) &&
-            !(rowIdx === FINISH_NODE_ROW && colIdx === FINISH_NODE_COL) &&
-            Math.random() >= 0.69,
-          previousNode: null,
-        }))
-      )
-    )
+  useEffect(() => {
+    setGrid(create2DMatrix(cols, rows))
   }, [])
 
   useEffect(() => {
-    reload()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  useEffect(() => {
-    const interval = setTimeout(() => {
-      setShouldUpdate(true)
-      console.log('update')
-    }, 30)
+    const interval = setInterval(() => {
+      mainAStar(grid)
+    }, 1000 / 5)
     return () => clearInterval(interval)
-  }, [isFinished])
+  }, [grid])
 
   return (
     <Flex w="100%" h="100%" direction="column" align="center">
-      <VStack w="100%" h="100%" spacing="0.5">
-        {grid.map((rows, rowIdx) => (
-          <Flex key={`node_id-${0}-${rowIdx}`}>
-            {rows.map((node, colIdx) => (
-              <C.NodeItem
-                key={`node_id-${colIdx}-${rowIdx}`}
-                onMouseDown={() => handleMouseDown(node.row, node.col)}
-                onMouseEnter={() => handleMouseEnter(node.row, node.col)}
-                onMouseUp={() => setMouseIsPressed(false)}
-                isShortest={node.isShortest}
-                col={node.col}
-                row={node.row}
-                isFinish={node.isFinish}
-                isStart={node.isStart}
-                isWall={node.isWall}
-                isVisited={node.isVisited}
-                shouldUpdate={shouldUpdate}
-              />
-            ))}
-          </Flex>
-        ))}
-      </VStack>
-      <Flex w="100%" justify="center" align="center">
-        <Button
-          colorScheme="blackAlpha"
-          mr="8"
-          isDisabled={!isFinished}
-          onClick={reload}
-        >
-          Reload
-        </Button>
-        <Button colorScheme="blackAlpha" onClick={visualizeDijkstra}>
-          Find
-        </Button>
-      </Flex>
+      <C.Canvas
+        draw={draw}
+        width={CANVAS_WIDTH}
+        height={CANVAS_HEIGHT}
+        style={{ borderWidth: 20, borderColor: 'black' }}
+      />
     </Flex>
   )
 }

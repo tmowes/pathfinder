@@ -3,8 +3,8 @@ import serve from 'electron-serve'
 
 import { createWindow } from './helpers'
 
-const WIDTH_SIZE = 1920 * 0.7
-const HEIGHT_SIZE = 1080 * 0.7
+const WIDTH_SIZE = Math.floor(1920 * 0.75)
+const HEIGHT_SIZE = Math.floor(1080 * 0.72)
 
 const isProd: boolean = process.env.NODE_ENV === 'production'
 
