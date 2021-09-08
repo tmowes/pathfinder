@@ -11,23 +11,12 @@ const FPS = 60
 
 const cols = Math.floor(140 * 2)
 const rows = Math.floor(70 * 2)
-// 002450 / 2 avg 0.004seconds
-// 009800 * 1 avg 0.026seconds
-// 039200 * 2 avg 0.26seconds
-// 088200 * 3 avg 0.9seconds
-// 156800 * 4 avg 3.2seconds
-// 245000 * 5 avg 7.0seconds
 
 const CANVAS_WIDTH = 1400
 const CANVAS_HEIGHT = 700
 
 const TILE_WIDTH = Math.floor(CANVAS_WIDTH / cols)
 const TILE_HEIGHT = Math.floor(CANVAS_HEIGHT / rows)
-
-const gridColors = {
-  isWall: '#1c1c1c',
-  isEmpty: '#99999',
-}
 
 export default function Home() {
   const [grid, setGrid] = useState<Node[][]>([])
